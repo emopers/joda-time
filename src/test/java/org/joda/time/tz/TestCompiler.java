@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.StringTokenizer;
+import java.util.NoSuchElementException;
 
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -67,6 +68,18 @@ public class TestCompiler extends TestCase {
         "Zone America/Los_Angeles -7:52:58 - LMT 1883 Nov 18 12:00\n" + 
         "            -8:00   US  P%sT    1946\n" + 
         "            -8:00   CA  P%sT    1967\n" + 
+        "            -8:00   US  P%sT";
+
+        static final String BROKEN_TIMEZONE_FILE =
+        "# Rules for building just America/Los_Angeles time zone.\n" +
+        "\n" +
+        "Rule    US  1918    1919    -   Mar lastSun 2:00    1:00    D\n" +
+        "Rule    US  1918    1919    -   Oct lastSun 2:00    0   S\n" +
+        "Rule    \n" +
+        "\n" +
+        "Zone America/Los_Angeles -7:52:58 - LMT 1883 Nov 18 12:00\n" +
+        "            -8:00   US  P%sT    1946\n" +
+        "            -8:00   CA  P%sT    1967\n" +
         "            -8:00   US  P%sT";
 
     private DateTimeZone originalDateTimeZone = null;
@@ -116,6 +129,16 @@ public class TestCompiler extends TestCase {
         assertEquals(false, tz.isFixed());
         TestBuilder.testForwardTransitions(tz, TestBuilder.AMERICA_LOS_ANGELES_DATA);
         TestBuilder.testReverseTransitions(tz, TestBuilder.AMERICA_LOS_ANGELES_DATA);
+    }
+
+    public void testCompileOnBrokenTimeZoneFile() throws Exception {
+	try{
+	    Provider provider = compileAndLoad(BROKEN_TIMEZONE_FILE);
+	} catch(NoSuchElementException nsee){
+	    fail("NoSuchElementException was thrown; broken timezone file?");
+	} catch(IllegalArgumentException iae){
+	    assertEquals("Attempting to create a Rule from an incomplete tokenizer.", iae.getMessage());
+	}
     }
 
     private Provider compileAndLoad(String data) throws Exception {
