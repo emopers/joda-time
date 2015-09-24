@@ -71,16 +71,11 @@ public class TestCompiler extends TestCase {
         "            -8:00   US  P%sT";
 
         static final String BROKEN_TIMEZONE_FILE =
-        "# Rules for building just America/Los_Angeles time zone.\n" +
+        "# Incomplete Rules for building America/Los_Angeles time zone.\n" +
         "\n" +
         "Rule    US  1918    1919    -   Mar lastSun 2:00    1:00    D\n" +
-        "Rule    US  1918    1919    -   Oct lastSun 2:00    0   S\n" +
-        "Rule    \n" +
-        "\n" +
-        "Zone America/Los_Angeles -7:52:58 - LMT 1883 Nov 18 12:00\n" +
-        "            -8:00   US  P%sT    1946\n" +
-        "            -8:00   CA  P%sT    1967\n" +
-        "            -8:00   US  P%sT";
+        "Rule    \n" ; // this line is intentionally incomplete
+
 
     private DateTimeZone originalDateTimeZone = null;
 
@@ -132,11 +127,13 @@ public class TestCompiler extends TestCase {
     }
 
     public void testCompileOnBrokenTimeZoneFile() throws Exception {
-	try{
+	try {
 	    Provider provider = compileAndLoad(BROKEN_TIMEZONE_FILE);
-	} catch(NoSuchElementException nsee){
+            fail();
+	} catch(NoSuchElementException nsee) {
+            // This is thrown unless the Rule constructor is patched
 	    fail("NoSuchElementException was thrown; broken timezone file?");
-	} catch(IllegalArgumentException iae){
+	} catch(IllegalArgumentException iae) {
 	    assertEquals("Attempting to create a Rule from an incomplete tokenizer.", iae.getMessage());
 	}
     }
