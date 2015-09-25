@@ -133,7 +133,7 @@ public class TestCompiler extends TestCase {
             // This used to be thrown in the Rule constructor
             fail("NoSuchElementException was thrown; broken timezone file?");
         } catch(IllegalArgumentException iae) {
-            assertEquals("Attempting to create a Rule from an incomplete tokenizer.", iae.getMessage());
+            assertEquals("Attempting to create a Rule from an incomplete tokenizer", iae.getMessage());
         }
     }
 
